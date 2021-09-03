@@ -3,18 +3,13 @@ import csv
 
 
 
-def __read_csv():
-    pass
-
-def __create_dict():
-    pass
 
 
-def __fill_dict():
-    pass
 
-def get_vessel_dict():
-    pass
+
+if __name__ == "__main__":
+    app.run(debug=True, host='0.0.0.0')
+    
 
 
 def add_csv_to_DB():
