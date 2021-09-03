@@ -2,21 +2,21 @@
   <div id="app">
     <!-- <img alt="Vue logo" src="./assets/logo.png">
     <HelloWorld msg="Welcome to Your Vue.js App"/>´ -->
-    <KplerMap/>
+    <KplerMap />
   </div>
 </template>
 
 <script>
 // import HelloWorld from './components/HelloWorld.vue'
-import KplerMap from './components/KplerMap.vue'
+import KplerMap from "./components/KplerMap.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     // HelloWorld,
     KplerMap,
-  }
-}
+  },
+};
 </script>
 
 <style>
