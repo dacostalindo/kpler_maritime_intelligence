@@ -76,7 +76,6 @@ def insertNewEntry():
         entry_dict['longitude'] = float(request.args['longitude'])
         entry_dict['received_time_utc'] = datetime.strptime(request.args['received_time_utc'], "%Y-%m-%d %H:%M:%S.%f")
     except:
-        print(entry_dict)
         return entry_dict, 404
 
     
@@ -101,8 +100,8 @@ def getAllVessels():
     ## TODO: Change to distinct values
     all_vessels = Vessel.query.distinct(Vessel.vessel_id).all()
     result = vessels_schema.dump(all_vessels)
-    if not result:
-        abort(404, message="Couldn't find vessel with that id")
+    # if not result:
+    #     abort(404, message="Couldn't find vessel with that id")
     return jsonify(result), 201
 
 
@@ -112,8 +111,8 @@ def getVessel(vessel_id):
     ## TODO: Add sort by asc vessel id
     vessel = Vessel.query.filter_by(vessel_id=vessel_id).order_by(asc(Vessel.time)).all()
     result = vessels_schema.dump(vessel)
-    if not result:
-        abort(404, message="Couldn't find vessel with that id")
+    # if not result:
+    #     abort(404, message="Couldn't find vessel with that id")
     return jsonify(result), 201
 
 
