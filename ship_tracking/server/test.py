@@ -12,16 +12,6 @@ import requests
 PATH_TO_CSV = 'vessel_data.csv'
 BASE = "http://127.0.0.1:5000/"
 
-# VESSEL_DATA = {
-#                 "vessel_id": 9999,
-#                 "latitude": 9999.0,
-#                 "longitude": 9999.0,
-#                 "received_time_utc": "2017-10-28 16:15:05.000000"
-#             }
-
-# response = requests.post(BASE + "insert", params=vessel_data)
-# response = requests.get(BASE )
-# print(response)
 
     
 def __post_to_db(csv_dict):

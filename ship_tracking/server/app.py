@@ -5,7 +5,7 @@ from flask_cors import CORS, cross_origin
 from flask_restful import abort
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
-# from sqlalchemy import asc
+from sqlalchemy import asc
 
 
 app = Flask(__name__)
@@ -35,43 +35,23 @@ class VesselSchema(ma.Schema):
 
 #init schema
 vessel_schema = VesselSchema()
-# vessels_schema = VesselSchema(many = True, strict = True)
+vessels_schema = VesselSchema(many = True)
 
-@app.route("/insert", methods=["POST"])
-@cross_origin()
-def insertNewEntry():
-    entry_dict = dict(request.args)
-    entry_dict['vessel_id'] = int(request.args['vessel_id'])
-    entry_dict['latitude'] = float(request.args['latitude'])
-    entry_dict['longitude'] = float(request.args['longitude'])
-    entry_dict['received_time_utc'] = datetime.strptime(request.args['received_time_utc'], "%Y-%m-%d %H:%M:%S.%f")
-
-    if __check_entry_validity(entry_dict):
-        newEntry = Vessel(entry_dict['vessel_id'], entry_dict['latitude'], entry_dict['longitude'], entry_dict['received_time_utc'])
-        if __exists_duplicate(entry_dict):
-            # return vessel_schema.jsonify(newEntry), 409
-            pass
-        else:
-            db.session.add(newEntry)
-            db.session.commit()
-            # return vessel_schema.jsonify(newEntry)
-    else:
-        print(entry_dict)
-        return  entry_dict, 404
-        # TODO: How to create an error handling system for the API
-    
-    return {'hello':'world'}, 201
 
 def __check_entry_validity(entry_dict):
     
+
     if entry_dict['vessel_id'] <= 0:
         return False
     if entry_dict['latitude'] < -90.0 or entry_dict['latitude'] > 90.0:
         return False
     if entry_dict['longitude'] < -180.0 or entry_dict['longitude'] > 180.0:
         return False
-    if entry_dict['received_time_utc'] > datetime.now() and entry_dict['received_time_utc'] != '':
-        return False
+    try:
+        entry_dict['received_time_utc'] = datetime.strptime(request.args['received_time_utc'], "%Y-%m-%d %H:%M:%S.%f")
+    except:
+        if entry_dict['received_time_utc'] > datetime.now() :
+            return False
     else:
         return True
 
@@ -88,27 +68,51 @@ def __exists_duplicate(entry_dict):
         return False
     
 
-# @app.route("/", methods=["GET"])
-# @cross_origin()
-# def getAllVessels():
-#     ## TODO: Change to distinct values
-#     all_vessels = Vessel.query.all()
-#     # result = vessel_schema.dump(all_vessels)
-#     result = None
-#     if not result:
-#         abort(404, message="Couldn't find vessel with that id")
-#     return jsonify(result.data), 201
+# TODO: How to create an error handling system for the API
+@app.route("/insert", methods=["POST"])
+@cross_origin()
+def insertNewEntry():
+    entry_dict = dict(request.args)
+    entry_dict['vessel_id'] = int(request.args['vessel_id'])
+    entry_dict['latitude'] = float(request.args['latitude'])
+    entry_dict['longitude'] = float(request.args['longitude'])
+    
+
+    if __check_entry_validity(entry_dict):
+        newEntry = Vessel(entry_dict['vessel_id'], entry_dict['latitude'], entry_dict['longitude'], entry_dict['received_time_utc'])
+        if __exists_duplicate(entry_dict):
+            return vessel_schema.jsonify(newEntry), 409
+        else:
+            db.session.add(newEntry)
+            db.session.commit()
+            return vessel_schema.jsonify(newEntry)
+    else:
+        print(entry_dict)
+        return  entry_dict, 404
+        
+    
 
 
-# @app.route("/vessel/<int:vessel_id>", methods=['GET'])
-# @cross_origin()
-# def getVessel(vessel_id):
-#     ## TODO: Add sort by asc vessel id
-#     vessel = Vessel.query.filter_by(vessel_id=vessel_id).all()
-#     result = vessel_schema.dump(vessel)
-#     if not result:
-#         abort(404, message="Couldn't find vessel with that id")
-#     return jsonify(result.data), 201
+@app.route("/vessels", methods=["GET"])
+@cross_origin()
+def getAllVessels():
+    ## TODO: Change to distinct values
+    all_vessels = Vessel.query.distinct(Vessel.vessel_id).all()
+    result = vessels_schema.dump(all_vessels)
+    if not result:
+        abort(404, message="Couldn't find vessel with that id")
+    return jsonify(result), 201
+
+
+@app.route("/vessels/<int:vessel_id>", methods=['GET'])
+@cross_origin()
+def getVessel(vessel_id):
+    ## TODO: Add sort by asc vessel id
+    vessel = Vessel.query.filter_by(vessel_id=vessel_id).order_by(asc(Vessel.time)).all()
+    result = vessels_schema.dump(vessel)
+    if not result:
+        abort(404, message="Couldn't find vessel with that id")
+    return jsonify(result), 201
 
 
 ## TODO: Take debug off for production
