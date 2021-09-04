@@ -47,11 +47,8 @@ def __check_entry_validity(entry_dict):
         return False
     if entry_dict['longitude'] < -180.0 or entry_dict['longitude'] > 180.0:
         return False
-    try:
-        entry_dict['received_time_utc'] = datetime.strptime(request.args['received_time_utc'], "%Y-%m-%d %H:%M:%S.%f")
-    except:
-        if entry_dict['received_time_utc'] > datetime.now() :
-            return False
+    if entry_dict['received_time_utc'] > datetime.now() :
+        return False
     else:
         return True
 
@@ -72,10 +69,16 @@ def __exists_duplicate(entry_dict):
 @app.route("/insert", methods=["POST"])
 @cross_origin()
 def insertNewEntry():
-    entry_dict = dict(request.args)
-    entry_dict['vessel_id'] = int(request.args['vessel_id'])
-    entry_dict['latitude'] = float(request.args['latitude'])
-    entry_dict['longitude'] = float(request.args['longitude'])
+    try:
+        entry_dict = dict(request.args)
+        entry_dict['vessel_id'] = int(request.args['vessel_id'])
+        entry_dict['latitude'] = float(request.args['latitude'])
+        entry_dict['longitude'] = float(request.args['longitude'])
+        entry_dict['received_time_utc'] = datetime.strptime(request.args['received_time_utc'], "%Y-%m-%d %H:%M:%S.%f")
+    except:
+        print(entry_dict)
+        return entry_dict, 404
+
     
 
     if __check_entry_validity(entry_dict):
@@ -87,7 +90,6 @@ def insertNewEntry():
             db.session.commit()
             return vessel_schema.jsonify(newEntry)
     else:
-        print(entry_dict)
         return  entry_dict, 404
         
     
