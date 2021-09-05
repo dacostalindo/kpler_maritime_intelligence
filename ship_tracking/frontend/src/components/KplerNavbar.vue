@@ -44,6 +44,7 @@
 <script>
 
 import axios from "axios";
+import L from "leaflet";
 
 export default {
   name: "GMVNavbar",
@@ -60,11 +61,14 @@ export default {
   },
   methods: {
       addVesselId(vessel_id) {
-        this.$store.commit("addVessel", vessel_id)
-        console.log(this.$store.getters.vesselToShow)
+        console.log(vessel_id)
+        const path = "http://localhost:5000/vessels/".concat(vessel_id);
+        axios.get(path, { crossDomain: true }).then((res) => {
+            res.data.map(v => Object.assign(v, {latlng: L.latLng(v.latitude, v.longitude)}))
+            this.$store.commit("addVessel", res.data)
+        });
       }
   }
-
 };
 </script>
 

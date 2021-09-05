@@ -5,16 +5,20 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
-        loadedVessel : []
+        loadedVessel : [],
+        currentPosition : [], 
     },
     mutations : {
-        addVessel(state, vessel_id) {
-            state.loadedVessel = [vessel_id];
+        addVessel(state, vesselData) {
+            state.loadedVessel = vesselData;
+        },
+        addCurrentPosition(state, vesselObject) {
+            state.currentPosition = [vesselObject]
         }
     },
     getters: {
-        vesselToShow(state) {
-            return state.loadedVessel;
+        allVesselPositions(state) {
+            return state.loadedVessel
         }
     },
     actions: {

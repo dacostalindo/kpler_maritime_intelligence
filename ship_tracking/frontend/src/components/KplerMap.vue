@@ -1,43 +1,28 @@
 <template>
   <div class="kpler">
-    <!-- <button v-on:click="getLocation">Greet</button> -->
-    <l-map :zoom="14" :center="initialLocation">
+    <l-map :zoom="4" :center="initialLocation">
       <l-icon-default />
       <l-tile-layer :url="mapData.url" :attribution="mapData.attribution" />
-      <l-moving-marker
-        v-for="l in getLocations"
-        :key="l.id"
-        :lat-lng="l.latlng"
-        :duration="duration"
-        :keep-at-center="keepAtCenter"
-        :icon="icon"
-      >
-        <l-popup :content="l.text" />
+        <l-moving-marker
+          v-for="l in location"
+          :key="l.id"
+          :lat-lng="l.latlng"
+          :duration="duration"
+          :keep-at-center="keepAtCenter"
+          :icon="icon"
+        >
+        <l-popup />
       </l-moving-marker>
     </l-map>
   </div>
 </template>
 
 <script>
-import axios from "axios";
+
 import L from "leaflet";
 import { LMap, LTileLayer, LIconDefault, LPopup } from "vue2-leaflet";
 import LMovingMarker from "vue2-leaflet-movingmarker";
 
-function rand(n) {
-  const max = n + 0.01;
-  const min = n - 0.01;
-  return Math.random() * (max - min) + min;
-}
-
-const locations = [];
-for (let i = 0; i < 10; i++) {
-  locations.push({
-    id: i,
-    latlng: L.latLng(rand(48.8929425), rand(2.3821873)),
-    text: "Moving Marker #" + i,
-  });
-}
 
 const icon = L.icon({
   iconUrl:
@@ -57,51 +42,47 @@ export default {
     LPopup,
   },
   props: {
-    duration: { type: Number, default: 2000 },
-    keepAtCenter: { type: Boolean, default: false },
+    duration: { type: Number, default: 10},
+    keepAtCenter: { type: Boolean, default: true },
   },
   computed: {
-    async getLocations() { 
-      const vessel_id = this.$store.state.loadedVessel;
-      const path = "http://localhost:5000/vessels/".concat(vessel_id);
-      await this.getAPIlatLon(path)
-      return 0 ;
+    location () {
+        let currentPosition = this.$store.state.currentPosition;
+        if (currentPosition.length) {
+          return currentPosition
+        }
+        return {}
     },
   },
-  methods: {
-    getAPIlatLon(path) {
-      axios.get(path, { crossDomain: true }).then((res) => { 
-        return res.data
-      });
-    }
-  },
   data() {
-    return {
-      locations,
-      icon,
-      initialLocation: L.latLng(48.8929425, 2.3821873),
-      mapData: {
-        attribution:
-          '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
-        url: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png",
-      },
-      interval: null,
-    };
+      return {
+        icon,
+        initialLocation: L.latLng(22.519, 49.338),
+        mapData: {
+          attribution:
+            '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
+          url: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png",
+        },
+        interval: null,
+      };
   },
   watch: {
     duration: {
       handler(value, oldValue) {
+        let counter = 0 
         if (value !== oldValue) {
-          clearInterval(this.interval);
-          const setRandomLatLng = () => {
-            this.locations.forEach((location) => {
-              location.latlng = L.latLng(rand(48.8929425), rand(2.3821873));
-            });
-          };
-          this.interval = setInterval(() => {
-            setRandomLatLng();
-          }, value);
-          setRandomLatLng();
+            clearInterval(this.interval)
+            const setRandomLatLng = () => {
+              let location = this.$store.getters.allVesselPositions
+              if (location.length && counter < location.length) {
+                this.$store.commit('addCurrentPosition', location[counter])
+                counter = counter + 1
+              }
+            }
+            this.interval = setInterval(() => {
+              setRandomLatLng()
+            }, value)
+            setRandomLatLng()
         }
       },
       immediate: true,
