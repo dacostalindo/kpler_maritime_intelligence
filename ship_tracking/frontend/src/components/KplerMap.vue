@@ -5,14 +5,14 @@
       <l-icon-default />
       <l-tile-layer :url="mapData.url" :attribution="mapData.attribution" />
       <l-moving-marker
-        v-for="l in locations"
+        v-for="l in getLocations"
         :key="l.id"
         :lat-lng="l.latlng"
         :duration="duration"
         :keep-at-center="keepAtCenter"
         :icon="icon"
       >
-        <l-popup :content="l.text"/>
+        <l-popup :content="l.text" />
       </l-moving-marker>
     </l-map>
   </div>
@@ -60,6 +60,21 @@ export default {
     duration: { type: Number, default: 2000 },
     keepAtCenter: { type: Boolean, default: false },
   },
+  computed: {
+    async getLocations() { 
+      const vessel_id = this.$store.state.loadedVessel;
+      const path = "http://localhost:5000/vessels/".concat(vessel_id);
+      await this.getAPIlatLon(path)
+      return 0 ;
+    },
+  },
+  methods: {
+    getAPIlatLon(path) {
+      axios.get(path, { crossDomain: true }).then((res) => { 
+        return res.data
+      });
+    }
+  },
   data() {
     return {
       locations,
@@ -72,13 +87,6 @@ export default {
       },
       interval: null,
     };
-  },
-  created() {
-      const path = "http://localhost:5000/";
-      axios.get(path, { crossDomain: true }).then((res) => {
-        this.locations = res.data
-        console.log(this.location);
-      });
   },
   watch: {
     duration: {
@@ -104,7 +112,7 @@ export default {
 
 <style>
 .kpler {
-  height: 500px;
+  height: 100%;
   width: 100%;
 }
 </style>
