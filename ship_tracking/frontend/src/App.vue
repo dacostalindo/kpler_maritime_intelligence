@@ -8,7 +8,7 @@
 </template>
 
 <script>
-
+/* eslint-disable */
 import KplerMap from "./components/KplerMap.vue"
 import KplerNavbar from "./components/KplerNavbar.vue"
 
