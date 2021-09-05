@@ -3,6 +3,7 @@ import csv
 import json
 import requests
 
+
 # from app import db
 
 # if not os.path.isfile("vessel.db"):
@@ -17,11 +18,11 @@ BASE = "http://127.0.0.1:5000/"
 def __post_to_db(csv_dict):
     counter = 0
     for entry in csv_dict:
-        #remove leading space in dictionary key
         json_entry = { x.translate({32:None}) : y 
                  for x, y in entry.items()}
+        # print(f"in {json_entry}")
         response = requests.post( BASE + "insert", params=json_entry)
-        print(response.json())
+        # print(f" out {response.json()}")
         
 
 def main():
